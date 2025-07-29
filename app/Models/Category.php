@@ -11,6 +11,8 @@ class Category extends Model
         'description',
     ];
 
+    public $timestamps = true;
+
     public function posts()
     {
         return $this->hasMany(Post::class, 'category_id');

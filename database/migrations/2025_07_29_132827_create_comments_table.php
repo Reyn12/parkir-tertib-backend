@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('post_id');
             $table->unsignedBigInteger('user_id');
             $table->text('comment_text');
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
             
             $table->foreign('post_id')->references('post_id')->on('posts')->onDelete('cascade');
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
