@@ -11,6 +11,13 @@ class Like extends Model
         'user_id',
     ];
 
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'like_id';
+
     public function post()
     {
         return $this->belongsTo(Post::class, 'post_id');

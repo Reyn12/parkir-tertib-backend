@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ApiToken;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -36,7 +38,14 @@ class AuthController extends Controller
             'profile_picture' => $request->profile_picture,
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = Str::random(64);
+        
+        ApiToken::create([
+            'user_id' => $user->user_id,
+            'token' => $token,
+            'name' => 'auth_token',
+            'expires_at' => now()->addDays(30)
+        ]);
 
         return response()->json([
             'success' => true,
@@ -79,7 +88,14 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = Str::random(64);
+        
+        ApiToken::create([
+            'user_id' => $user->user_id,
+            'token' => $token,
+            'name' => 'auth_token',
+            'expires_at' => now()->addDays(30)
+        ]);
 
         return response()->json([
             'success' => true,
@@ -100,7 +116,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->bearerToken();
+        
+        if ($token) {
+            ApiToken::where('token', $token)->delete();
+        }
 
         return response()->json([
             'success' => true,

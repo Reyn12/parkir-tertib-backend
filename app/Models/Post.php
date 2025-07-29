@@ -19,6 +19,13 @@ class Post extends Model
         'comments_count',
     ];
 
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'post_id';
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

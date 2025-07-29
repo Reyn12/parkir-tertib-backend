@@ -11,6 +11,13 @@ class Category extends Model
         'description',
     ];
 
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'category_id';
+
     public $timestamps = true;
 
     public function posts()

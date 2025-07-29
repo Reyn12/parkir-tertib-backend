@@ -12,6 +12,13 @@ class Comment extends Model
         'comment_text',
     ];
 
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'comment_id';
+
     public function post()
     {
         return $this->belongsTo(Post::class, 'post_id');
