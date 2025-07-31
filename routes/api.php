@@ -34,4 +34,5 @@ Route::middleware('check.token')->group(function () {
     Route::get('/posts/{id}', [PostController::class, 'show']);
     Route::get('/posts/user/{user_id}', [PostController::class, 'getByUser']);
     Route::get('/posts/category/{category_id}', [PostController::class, 'getByCategory']);
+    Route::post('/posts', [PostController::class, 'store']);
 }); 

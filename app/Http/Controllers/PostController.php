@@ -31,8 +31,22 @@ class PostController extends Controller
             });
         }
 
-        // Sort by latest first
-        $posts = $query->orderBy('created_at', 'desc')->paginate(10);
+        // Sort based on tab selection
+        if ($request->has('tab')) {
+            if ($request->tab === 'popular') {
+                // Sort by likes count + comments count (popularity)
+                $query->orderByRaw('(likes_count + comments_count) DESC')
+                      ->orderBy('created_at', 'desc');
+            } else {
+                // Default: sort by latest
+                $query->orderBy('created_at', 'desc');
+            }
+        } else {
+            // Default: sort by latest
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $posts = $query->paginate(10);
 
         return response()->json([
             'success' => true,
@@ -153,5 +167,55 @@ class PostController extends Controller
                 ]
             ]
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'location_name' => 'required|string|max:255',
+            'photo_url' => 'required|string|max:500',
+            'category_id' => 'required|exists:categories,category_id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        $post = Post::create([
+            'user_id' => $user->user_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'location_name' => $request->location_name,
+            'photo_url' => $request->photo_url,
+            'category_id' => $request->category_id,
+            'status' => 'pending', // Default status pending
+            'likes_count' => 0,
+            'comments_count' => 0,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Post created successfully',
+            'data' => [
+                'post' => [
+                    'post_id' => $post->post_id,
+                    'title' => $post->title,
+                    'description' => $post->description,
+                    'location_name' => $post->location_name,
+                    'photo_url' => $post->photo_url,
+                    'status' => $post->status,
+                    'category_id' => $post->category_id,
+                    'created_at' => $post->created_at,
+                ]
+            ]
+        ], 201);
     }
 }
