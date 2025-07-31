@@ -283,4 +283,33 @@ class PostController extends Controller
             ]
         ]);
     }
+
+    public function destroy(Request $request, $id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Post not found'
+            ], 404);
+        }
+
+        $user = $request->user();
+
+        // Cek apakah user yang punya post
+        if ($post->user_id !== $user->user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to delete this post'
+            ], 403);
+        }
+
+        $post->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Post deleted successfully'
+        ]);
+    }
 }
