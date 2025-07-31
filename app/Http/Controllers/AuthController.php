@@ -145,4 +145,67 @@ class AuthController extends Controller
             ]
         ]);
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'username' => 'sometimes|required|string|max:50|unique:users,username,' . $user->user_id . ',user_id',
+            'email' => 'sometimes|required|string|email|max:100|unique:users,email,' . $user->user_id . ',user_id',
+            'phone_number' => 'nullable|string|max:20',
+            'profile_picture' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user->update($request->only([
+            'username', 'email', 'phone_number', 'profile_picture'
+        ]));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'data' => [
+                'user' => [
+                    'user_id' => $user->user_id,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'phone_number' => $user->phone_number,
+                    'profile_picture' => $user->profile_picture,
+                ]
+            ]
+        ]);
+    }
+
+    public function showUser($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User profile retrieved successfully',
+            'data' => [
+                'user' => [
+                    'user_id' => $user->user_id,
+                    'username' => $user->username,
+                    'profile_picture' => $user->profile_picture,
+                    'created_at' => $user->created_at,
+                ]
+            ]
+        ]);
+    }
 }

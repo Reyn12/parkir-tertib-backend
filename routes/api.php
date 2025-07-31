@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('check.token')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::get('/users/{id}', [AuthController::class, 'showUser']);
     
     // Post routes (perlu login)
     Route::get('/posts', [PostController::class, 'index']);
@@ -43,4 +46,9 @@ Route::middleware('check.token')->group(function () {
     Route::post('/comments', [CommentController::class, 'store']);
     Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
     Route::get('/posts/{post_id}/comments', [CommentController::class, 'getByPost']);
+    
+    // Like routes (perlu login)
+    Route::post('/likes/toggle', [LikeController::class, 'toggle']);
+    Route::get('/posts/{post_id}/like-status', [LikeController::class, 'checkLike']);
+    Route::get('/posts/{post_id}/likes', [LikeController::class, 'getLikesByPost']);
 }); 
