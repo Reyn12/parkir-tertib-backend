@@ -35,4 +35,5 @@ Route::middleware('check.token')->group(function () {
     Route::get('/posts/user/{user_id}', [PostController::class, 'getByUser']);
     Route::get('/posts/category/{category_id}', [PostController::class, 'getByCategory']);
     Route::post('/posts', [PostController::class, 'store']);
+    Route::put('/posts/{id}', [PostController::class, 'update']);
 }); 

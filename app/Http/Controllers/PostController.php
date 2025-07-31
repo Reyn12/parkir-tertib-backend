@@ -218,4 +218,69 @@ class PostController extends Controller
             ]
         ], 201);
     }
+
+    public function update(Request $request, $id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Post not found'
+            ], 404);
+        }
+
+        $user = $request->user();
+
+        // Cek apakah user yang punya post
+        if ($post->user_id !== $user->user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to edit this post'
+            ], 403);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string',
+            'location_name' => 'sometimes|required|string|max:255',
+            'photo_url' => 'sometimes|required|string|max:500',
+            'category_id' => 'sometimes|required|exists:categories,category_id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $post->update($request->only([
+            'title', 'description', 'location_name', 'photo_url', 'category_id'
+        ]));
+
+        // Set status jadi pending lagi setelah edit dan clear rejection reason
+        $post->update([
+            'status' => 'pending',
+            'rejection_reason' => null
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Post updated successfully',
+            'data' => [
+                'post' => [
+                    'post_id' => $post->post_id,
+                    'title' => $post->title,
+                    'description' => $post->description,
+                    'location_name' => $post->location_name,
+                    'photo_url' => $post->photo_url,
+                    'status' => $post->status,
+                    'category_id' => $post->category_id,
+                    'updated_at' => $post->updated_at,
+                ]
+            ]
+        ]);
+    }
 }
