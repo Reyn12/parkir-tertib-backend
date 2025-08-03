@@ -23,6 +23,8 @@ return new class extends Migration
             $table->text('rejection_reason')->nullable();
             $table->integer('likes_count')->default(0);
             $table->integer('comments_count')->default(0);
+            $table->boolean('hide_identity')->default(false);
+            $table->enum('privacy_type', ['public'])->default('public');
             $table->timestamps();
             
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');

@@ -48,11 +48,21 @@ class PostController extends Controller
 
         $posts = $query->paginate(10);
 
+        // Handle hide identity for each post
+        $postsArray = [];
+        foreach ($posts->items() as $post) {
+            $postData = $post->toArray();
+            if ($post->hide_identity == 1) {
+                $postData['user']['username'] = 'Anonymous';
+            }
+            $postsArray[] = $postData;
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Posts retrieved successfully',
             'data' => [
-                'posts' => $posts->items(),
+                'posts' => $postsArray,
                 'pagination' => [
                     'current_page' => $posts->currentPage(),
                     'last_page' => $posts->lastPage(),
@@ -74,6 +84,9 @@ class PostController extends Controller
             ], 404);
         }
 
+        // Handle hide identity
+        $displayUsername = $post->hide_identity == 1 ? 'Anonymous' : $post->user->username;
+
         return response()->json([
             'success' => true,
             'message' => 'Post retrieved successfully',
@@ -88,11 +101,13 @@ class PostController extends Controller
                     'rejection_reason' => $post->rejection_reason,
                     'likes_count' => $post->likes_count,
                     'comments_count' => $post->comments_count,
+                    'hide_identity' => $post->hide_identity,
+                    'privacy_type' => $post->privacy_type,
                     'created_at' => $post->created_at,
                     'updated_at' => $post->updated_at,
                     'user' => [
                         'user_id' => $post->user->user_id,
-                        'username' => $post->user->username,
+                        'username' => $displayUsername,
                         'profile_picture' => $post->user->profile_picture,
                     ],
                     'category' => [
@@ -132,11 +147,19 @@ class PostController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        // Handle hide identity for each post
+        $postsData = $posts->items();
+        foreach ($postsData as $post) {
+            if ($post->hide_identity == 1) {
+                $post->user->username = 'Anonymous';
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'User posts retrieved successfully',
             'data' => [
-                'posts' => $posts->items(),
+                'posts' => $postsData,
                 'pagination' => [
                     'current_page' => $posts->currentPage(),
                     'last_page' => $posts->lastPage(),
@@ -154,11 +177,19 @@ class PostController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        // Handle hide identity for each post
+        $postsData = $posts->items();
+        foreach ($postsData as $post) {
+            if ($post->hide_identity == 1) {
+                $post->user->username = 'Anonymous';
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Category posts retrieved successfully',
             'data' => [
-                'posts' => $posts->items(),
+                'posts' => $postsData,
                 'pagination' => [
                     'current_page' => $posts->currentPage(),
                     'last_page' => $posts->lastPage(),
@@ -177,6 +208,8 @@ class PostController extends Controller
             'location_name' => 'required|string|max:255',
             'photo_url' => 'required|string|max:500',
             'category_id' => 'required|exists:categories,category_id',
+            'hide_identity' => 'boolean',
+            'privacy_type' => 'in:public',
         ]);
 
         if ($validator->fails()) {
@@ -199,6 +232,8 @@ class PostController extends Controller
             'status' => 'pending', // Default status pending
             'likes_count' => 0,
             'comments_count' => 0,
+            'hide_identity' => $request->hide_identity ?? false,
+            'privacy_type' => $request->privacy_type ?? 'public',
         ]);
 
         return response()->json([
@@ -213,6 +248,8 @@ class PostController extends Controller
                     'photo_url' => $post->photo_url,
                     'status' => $post->status,
                     'category_id' => $post->category_id,
+                    'hide_identity' => $post->hide_identity,
+                    'privacy_type' => $post->privacy_type,
                     'created_at' => $post->created_at,
                 ]
             ]
@@ -246,6 +283,8 @@ class PostController extends Controller
             'location_name' => 'sometimes|required|string|max:255',
             'photo_url' => 'sometimes|required|string|max:500',
             'category_id' => 'sometimes|required|exists:categories,category_id',
+            'hide_identity' => 'sometimes|boolean',
+            'privacy_type' => 'sometimes|in:public',
         ]);
 
         if ($validator->fails()) {
@@ -257,7 +296,7 @@ class PostController extends Controller
         }
 
         $post->update($request->only([
-            'title', 'description', 'location_name', 'photo_url', 'category_id'
+            'title', 'description', 'location_name', 'photo_url', 'category_id', 'hide_identity', 'privacy_type'
         ]));
 
         // Set status jadi pending lagi setelah edit dan clear rejection reason
@@ -278,6 +317,8 @@ class PostController extends Controller
                     'photo_url' => $post->photo_url,
                     'status' => $post->status,
                     'category_id' => $post->category_id,
+                    'hide_identity' => $post->hide_identity,
+                    'privacy_type' => $post->privacy_type,
                     'updated_at' => $post->updated_at,
                 ]
             ]

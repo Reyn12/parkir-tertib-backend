@@ -29,6 +29,8 @@ class PostSeeder extends Seeder
                 'status' => 'approved',
                 'likes_count' => 15,
                 'comments_count' => 3,
+                'hide_identity' => false,
+                'privacy_type' => 'public',
             ],
             [
                 'user_id' => $users->where('username', 'budi')->first()->user_id,
@@ -40,6 +42,8 @@ class PostSeeder extends Seeder
                 'status' => 'approved',
                 'likes_count' => 8,
                 'comments_count' => 1,
+                'hide_identity' => true,
+                'privacy_type' => 'public',
             ],
             [
                 'user_id' => $users->where('username', 'sari')->first()->user_id,
@@ -51,6 +55,8 @@ class PostSeeder extends Seeder
                 'status' => 'pending',
                 'likes_count' => 5,
                 'comments_count' => 2,
+                'hide_identity' => false,
+                'privacy_type' => 'public',
             ],
             [
                 'user_id' => $users->where('username', 'reynald')->first()->user_id,
@@ -63,6 +69,8 @@ class PostSeeder extends Seeder
                 'rejection_reason' => 'Foto tidak jelas, tidak terlihat pelanggaran',
                 'likes_count' => 0,
                 'comments_count' => 0,
+                'hide_identity' => true,
+                'privacy_type' => 'public',
             ],
             [
                 'user_id' => $users->where('username', 'budi')->first()->user_id,
@@ -74,6 +82,8 @@ class PostSeeder extends Seeder
                 'status' => 'approved',
                 'likes_count' => 25,
                 'comments_count' => 7,
+                'hide_identity' => false,
+                'privacy_type' => 'public',
             ],
         ];
 

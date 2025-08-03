@@ -26,6 +26,9 @@ Route::middleware('check.token')->get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Public routes (tidak perlu login)
+Route::get('/posts', [PostController::class, 'index']);
+
 // Protected routes
 Route::middleware('check.token')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -34,7 +37,6 @@ Route::middleware('check.token')->group(function () {
     Route::get('/users/{id}', [AuthController::class, 'showUser']);
     
     // Post routes (perlu login)
-    Route::get('/posts', [PostController::class, 'index']);
     Route::get('/posts/{id}', [PostController::class, 'show']);
     Route::get('/posts/user/{user_id}', [PostController::class, 'getByUser']);
     Route::get('/posts/category/{category_id}', [PostController::class, 'getByCategory']);

@@ -17,6 +17,8 @@ class Post extends Model
         'rejection_reason',
         'likes_count',
         'comments_count',
+        'hide_identity',
+        'privacy_type',
     ];
 
     /**
