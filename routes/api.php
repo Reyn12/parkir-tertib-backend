@@ -28,6 +28,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Public routes (tidak perlu login)
 Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/{id}', [PostController::class, 'show'])->whereNumber('id');
 
 // Protected routes
 Route::middleware('check.token')->group(function () {
@@ -37,8 +38,7 @@ Route::middleware('check.token')->group(function () {
     Route::get('/users/{id}', [AuthController::class, 'showUser']);
     
     // Post routes (perlu login)
-    Route::get('/posts/{id}', [PostController::class, 'show']);
-    Route::get('/posts/user/{user_id}', [PostController::class, 'getByUser']);
+    Route::get('/posts/me', [PostController::class, 'getByUser']);
     Route::get('/posts/category/{category_id}', [PostController::class, 'getByCategory']);
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{id}', [PostController::class, 'update']);

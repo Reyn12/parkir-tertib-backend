@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Like;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PostController extends Controller
 {
@@ -50,10 +53,65 @@ class PostController extends Controller
 
         // Handle hide identity for each post
         $postsArray = [];
+        $user = null;
+        
+        // Coba ambil user dari token jika ada di header (Bearer Token)
+        if ($request->bearerToken()) {
+            try {
+                // Handle token manual karena endpoint ini ga pake middleware check.token
+                $token = $request->bearerToken();
+                $apiToken = \App\Models\ApiToken::where('token', $token)
+                    ->where('expires_at', '>', now())
+                    ->first();
+                    
+                if ($apiToken) {
+                    $user = \App\Models\User::find($apiToken->user_id);
+                    
+                    // Debug: log user info
+                    Log::info('Token found, user:', [
+                        'user_id' => $user ? $user->user_id : null,
+                        'username' => $user ? $user->username : null,
+                        'token' => $token
+                    ]);
+                } else {
+                    $user = null;
+                    Log::info('Token invalid or expired');
+                }
+            } catch (\Exception $e) {
+                // Jika ada error saat ambil user, tetap null
+                $user = null;
+                Log::error('Error getting user:', ['error' => $e->getMessage()]);
+            }
+        } else {
+            Log::info('No token found');
+        }
+
         foreach ($posts->items() as $post) {
             $postData = $post->toArray();
             if ($post->hide_identity == 1) {
                 $postData['user']['username'] = 'Anonymous';
+            }
+
+            // Cek apakah user sudah login (token valid) dan apakah user sudah like postingan ini
+            $postData['isLike'] = false; // Default ke false
+            if ($user) {
+                try {
+                    $isLiked = Like::where('user_id', $user->user_id)
+                                ->where('post_id', $post->post_id)
+                                ->exists();
+                    
+                    $postData['isLike'] = $isLiked;
+                    
+                    // Debug: log like check
+                    Log::info('Like check for post ' . $post->post_id . ':', [
+                        'user_id' => $user->user_id,
+                        'is_liked' => $isLiked
+                    ]);
+                } catch (\Exception $e) {
+                    // Jika error saat cek like, tetap false dan jangan crash
+                    $postData['isLike'] = false;
+                    Log::error('Error checking like:', ['error' => $e->getMessage()]);
+                }
             }
             $postsArray[] = $postData;
         }
@@ -73,7 +131,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $post = Post::with(['user', 'category', 'comments.user', 'likes.user'])->find($id);
 
@@ -86,6 +144,30 @@ class PostController extends Controller
 
         // Handle hide identity
         $displayUsername = $post->hide_identity == 1 ? 'Anonymous' : $post->user->username;
+
+        // Cek apakah user sudah like postingan ini
+        $isLike = false;
+        if ($request->bearerToken()) {
+            try {
+                // Handle token manual karena endpoint ini ga pake middleware check.token
+                $token = $request->bearerToken();
+                $apiToken = \App\Models\ApiToken::where('token', $token)
+                    ->where('expires_at', '>', now())
+                    ->first();
+                    
+                if ($apiToken) {
+                    $user = \App\Models\User::find($apiToken->user_id);
+                    if ($user) {
+                        $isLike = Like::where('user_id', $user->user_id)
+                                    ->where('post_id', $post->post_id)
+                                    ->exists();
+                    }
+                }
+            } catch (\Exception $e) {
+                // Jika error, tetap false
+                $isLike = false;
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -103,6 +185,7 @@ class PostController extends Controller
                     'comments_count' => $post->comments_count,
                     'hide_identity' => $post->hide_identity,
                     'privacy_type' => $post->privacy_type,
+                    'isLike' => $isLike, // Tambahin field isLike
                     'created_at' => $post->created_at,
                     'updated_at' => $post->updated_at,
                     'user' => [
@@ -140,12 +223,45 @@ class PostController extends Controller
         ]);
     }
 
-    public function getByUser($user_id)
+    public function getByUser(Request $request)
     {
+        $token = $request->bearerToken();
+        $routeUri = $request->route() ? $request->route()->uri() : null;
+        Log::info('GET /posts/me called', [
+            'path' => $request->path(),
+            'route' => $routeUri,
+            'method' => $request->method(),
+            'token_present' => $token ? true : false,
+            'token_prefix' => $token ? substr($token, 0, 12) : null,
+            'ip' => $request->ip(),
+            'ua' => $request->userAgent(),
+        ]);
+
+        $user = $request->user();
+        if (!$user) {
+            Log::warning('GET /posts/me unauthorized');
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        Log::info('GET /posts/me authenticated', [
+            'user_id' => $user->user_id,
+            'username' => $user->username,
+        ]);
+
         $posts = Post::with(['user', 'category'])
-            ->where('user_id', $user_id)
+            ->where('user_id', $user->user_id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        Log::info('GET /posts/me result', [
+            'current_page' => $posts->currentPage(),
+            'per_page' => $posts->perPage(),
+            'count' => count($posts->items()),
+            'total' => $posts->total(),
+        ]);
 
         // Handle hide identity for each post
         $postsData = $posts->items();
