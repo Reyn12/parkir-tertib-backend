@@ -20,7 +20,7 @@ class PostSeeder extends Seeder
 
         $posts = [
             [
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
                 'title' => 'Mobil Parkir Sembarangan di Depan Toko',
                 'description' => 'Mobil ini parkir sembarangan di depan toko, menghalangi akses masuk. Plakat B 1234 ABC',
                 'category_id' => $categories->where('category_name', 'Parkir Sembarangan')->first()->category_id,
@@ -59,7 +59,7 @@ class PostSeeder extends Seeder
                 'privacy_type' => 'public',
             ],
             [
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
                 'title' => 'Parkir di Zona Larangan',
                 'description' => 'Mobil parkir di zona larangan parkir. Plakat B 1111 AAA',
                 'category_id' => $categories->where('category_name', 'Parkir di Zona Larangan')->first()->category_id,

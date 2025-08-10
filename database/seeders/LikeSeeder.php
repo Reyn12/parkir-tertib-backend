@@ -30,13 +30,13 @@ class LikeSeeder extends Seeder
             ],
             [
                 'post_id' => $posts->where('title', 'Mobil Parkir Sembarangan di Depan Toko')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
             ],
 
             // Likes untuk "Motor Parkir di Trotoar"
             [
                 'post_id' => $posts->where('title', 'Motor Parkir di Trotoar')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
             ],
             [
                 'post_id' => $posts->where('title', 'Motor Parkir di Trotoar')->first()->post_id,
@@ -46,7 +46,7 @@ class LikeSeeder extends Seeder
             // Likes untuk "Parkir Ganda di Mall"
             [
                 'post_id' => $posts->where('title', 'Parkir Ganda di Mall')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
             ],
             [
                 'post_id' => $posts->where('title', 'Parkir Ganda di Mall')->first()->post_id,
@@ -60,7 +60,7 @@ class LikeSeeder extends Seeder
             // Likes untuk "Parkir di Jalur Darurat"
             [
                 'post_id' => $posts->where('title', 'Parkir di Jalur Darurat')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
             ],
             [
                 'post_id' => $posts->where('title', 'Parkir di Jalur Darurat')->first()->post_id,

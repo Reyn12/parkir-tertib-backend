@@ -9,12 +9,41 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        // Fix: Manual parse JSON kalau request->all() kosong
+        $data = $request->all();
+        if (empty($data) && $request->header('Content-Type') === 'application/json') {
+            $data = json_decode($request->getContent(), true) ?: [];
+        }
+        
+        // Debug log lebih detail
+        Log::info('Register debug:', [
+            'request_all' => $request->all(),
+            'raw_content' => $request->getContent(),
+            'content_type' => $request->header('Content-Type'),
+            'parsed_data' => $data,
+            'json_decode_result' => json_decode($request->getContent(), true),
+            'json_last_error' => json_last_error_msg(),
+            'is_json' => $request->isJson(),
+            'wants_json' => $request->wantsJson(),
+            'method' => $request->method(),
+            'headers' => $request->headers->all()
+        ]);
+        
+        // Map field names dari Flutter ke Laravel
+        if (isset($data['name']) && !isset($data['username'])) {
+            $data['username'] = $data['name'];
+        }
+        if (isset($data['phone']) && !isset($data['phone_number'])) {
+            $data['phone_number'] = $data['phone'];
+        }
+        
+        $validator = Validator::make($data, [
             'username' => 'required|string|max:50|unique:users',
             'email' => 'required|string|email|max:100|unique:users',
             'password' => 'required|string|min:6',
@@ -23,6 +52,12 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::error('Register validation failed:', [
+                'data_validated' => $data,
+                'validation_errors' => $validator->errors()->toArray(),
+                'rules' => $validator->getRules()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
@@ -31,11 +66,11 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'phone_number' => $request->phone_number,
-            'profile_picture' => $request->profile_picture,
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'phone_number' => $data['phone_number'] ?? null,
+            'profile_picture' => $data['profile_picture'] ?? null,
         ]);
 
         $token = Str::random(64);

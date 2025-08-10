@@ -31,17 +31,17 @@ class CommentSeeder extends Seeder
             ],
             [
                 'post_id' => $posts->where('title', 'Mobil Parkir Sembarangan di Depan Toko')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
                 'comment_text' => 'Makasih udah share! Ini beneran mengganggu akses masuk toko.',
             ],
             [
                 'post_id' => $posts->where('title', 'Motor Parkir di Trotoar')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
                 'comment_text' => 'Motor ini sering banget parkir di trotoar, bikin pejalan kaki susah lewat.',
             ],
             [
                 'post_id' => $posts->where('title', 'Parkir Ganda di Mall')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
                 'comment_text' => 'Di mall gini masih aja parkir ganda, egois banget.',
             ],
             [
@@ -56,7 +56,7 @@ class CommentSeeder extends Seeder
             ],
             [
                 'post_id' => $posts->where('title', 'Parkir di Jalur Darurat')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
                 'comment_text' => 'Bener banget! Ini harus segera ditindak tegas.',
             ],
             [
@@ -71,7 +71,7 @@ class CommentSeeder extends Seeder
             ],
             [
                 'post_id' => $posts->where('title', 'Parkir di Jalur Darurat')->first()->post_id,
-                'user_id' => $users->where('username', 'reynald')->first()->user_id,
+                'user_id' => $users->where('username', 'renaldi')->first()->user_id,
                 'comment_text' => 'Bagus! Kita harus kerja sama buat bikin parkir tertib.',
             ],
             [
