@@ -469,4 +469,56 @@ class PostController extends Controller
             'message' => 'Post deleted successfully'
         ]);
     }
+
+    // Admin functions untuk approve posts
+    public function adminIndex()
+    {
+        // Ambil semua posts yang pending
+        $pendingPosts = Post::with(['user', 'category'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.posts', compact('pendingPosts'));
+    }
+
+    public function approve($id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return redirect()->back()->with('error', 'Post tidak ditemukan');
+        }
+
+        $post->update([
+            'status' => 'approved',
+            'rejection_reason' => null
+        ]);
+
+        return redirect()->back()->with('success', 'Post berhasil di-approve!');
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return redirect()->back()->with('error', 'Post tidak ditemukan');
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'rejection_reason' => 'required|string|max:500'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('error', 'Alasan penolakan harus diisi');
+        }
+
+        $post->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason
+        ]);
+
+        return redirect()->back()->with('success', 'Post berhasil ditolak!');
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\ApiToken;
+use App\Models\Post;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -167,6 +168,21 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        // Hitung jumlah postingan berdasarkan status
+        $pendingCount = Post::where('user_id', $user->user_id)
+            ->where('status', 'pending')
+            ->count();
+            
+        $approvedCount = Post::where('user_id', $user->user_id)
+            ->where('status', 'approved')
+            ->count();
+            
+        $rejectedCount = Post::where('user_id', $user->user_id)
+            ->where('status', 'rejected')
+            ->count();
+            
+        $totalPosts = Post::where('user_id', $user->user_id)->count();
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -176,6 +192,12 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'phone_number' => $user->phone_number,
                     'profile_picture' => $user->profile_picture,
+                ],
+                'posts_summary' => [
+                    'total_posts' => $totalPosts,
+                    'pending_posts' => $pendingCount,
+                    'approved_posts' => $approvedCount,
+                    'rejected_posts' => $rejectedCount,
                 ]
             ]
         ]);
